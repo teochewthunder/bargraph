@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Bar Graph</title>
+
+		<style>
+			div {outline:0px solid #FFAA00;}
+
+			#graph_container
+			{
+				height:500px;
+			}
+
+			#col_container
+			{
+				height:100%;
+				width:95%;
+				float:left;
+			}
+
+			.col_section
+			{
+				width:100px;
+				height:100%;
+				float:left;
+			}
+
+			#average_container
+			{
+				height:80%;
+				margin-bottom:-100%;
+				overflow:hidden;
+				outline:0px solid #FF4400;
+			}
+
+			#average_fill
+			{
+				width:100%;
+				border-top:1px dotted #000000;
+				text-align:center;
+				transition:all 1s;
+				outline:0px solid #FF4400;
+			}
+
+			#average_label
+			{
+				width:100%;
+				color:#000000;
+				font-weight:bold;
+				font-family:verdana;
+				text-align:center;
+			}			
+
+			.data_container
+			{
+				margin: 0 auto 0 auto;
+				width:80%;
+				height:80%;
+				background-color:transparent;
+				overflow:hidden;
+			}
+
+			.data_label
+			{
+				margin: 0 auto 0 auto;
+				text-align:center;
+				width:100%;
+				height:20%;
+				color:#000000;
+				font-weight:bold;
+				font-family:verdana;
+				font-size:0.8em;
+				border-top:1px solid #000000;
+			}
+
+			.data_fill
+			{
+				width:100%;
+				height:100%;
+				color:#000000;
+				background-color:#FF0000;
+				text-align:center;
+				font-weight:bold;
+				font-family:verdana;
+				font-size:0.8em;
+				margin-top:0%;
+				transition:all 1s;
+			}
+
+			.value_label
+			{
+				color:#FFFFFF;
+				font-weight:bold;
+				font-family:verdana;
+				font-size:0.5em;
+			}
+
+			#scale_container
+			{
+				height:80%;
+				width:20px;
+				float:left;
+				border-bottom:1px solid #000000;
+			}
+
+			.scale_unit
+			{
+				width:100%;
+				border-top:1px solid #000000;
+				border-left:1px solid #000000;
+				color:#FF0000;
+				text-align:right;
+				font-weight:bold;
+				font-family:verdana;
+				font-size:0.5em;
+			}
+		</style>
+
+		<script>
+			var graphdata = 
+			{
+				"cols":
+				[
+					{
+						"title":"Fernando Torres",
+						"stats": 
+						[
+							{"year":2007,"goals":33,"appearances":33},
+							{"year":2008,"goals":24,"appearances":24},
+							{"year":2009,"goals":22,"appearances":22},
+							{"year":2010,"goals":23,"appearances":23},
+						]
+					},
+					{
+						"title":"Steven Gerrard",
+						"stats": 
+						[
+							{"year":2007,"goals":11,"appearances":36},
+							{"year":2008,"goals":16,"appearances":34},
+							{"year":2009,"goals":9,"appearances":31},
+							{"year":2010,"goals":4,"appearances":33},
+						]
+					},
+					{
+						"title":"Dirk Kuyt",
+						"stats": 
+						[
+							{"year":2007,"goals":3,"appearances":34},
+							{"year":2008,"goals":12,"appearances":32},
+							{"year":2009,"goals":9,"appearances":38},
+							{"year":2010,"goals":13,"appearances":37},
+						]
+					},
+					{
+						"title":"Ryan Babel",
+						"stats": 
+						[
+							{"year":2007,"goals":4,"appearances":30},
+							{"year":2008,"goals":3,"appearances":27},
+							{"year":2009,"goals":4,"appearances":25},
+							{"year":2010,"goals":1,"appearances":1},
+						]
+					},
+					{
+						"title":"Yossi Benayoun",
+						"stats": 
+						[
+							{"year":2007,"goals":4,"appearances":30},
+							{"year":2008,"goals":8,"appearances":32},
+							{"year":2009,"goals":6,"appearances":30},
+						]
+					},
+					{
+						"title":"David N'gog",
+						"stats": 
+						[
+							{"year":2008,"goals":2,"appearances":14},
+							{"year":2009,"goals":5,"appearances":24},
+							{"year":2010,"goals":2,"appearances":25},
+						]
+					},
+				],
+				"rows":[2007,2008,2009,2010],
+				"stats":["goals","appearances"]
+			}; 
+
+			function populate()
+			{
+				var col, container, label, fill, p;
+				var graph = document.getElementById("col_container");
+
+				for (var i=0;i<graphdata.cols.length;i++)
+				{
+					col = document.createElement("div");
+					col.className = "col_section";
+
+					container = document.createElement("div");
+					container.className = "data_container";
+
+					fill = document.createElement("div");
+					fill.className = "data_fill";
+					fill.id = "fill_" + i;
+
+					p = document.createElement("p");
+					p.className = "value_label";
+					p.id = "p_" + i;
+
+					fill.appendChild(p);
+					container.appendChild(fill);
+
+					label = document.createElement("div");
+					label.className = "data_label";
+					label.innerHTML = graphdata.cols[i].title;
+
+					col.appendChild(container);
+					col.appendChild(label);
+
+					graph.appendChild(col);
+				}
+
+
+				var ddl,option;
+
+				ddl = document.getElementById("ddlRow");
+
+				for (var i=0;i<graphdata.rows.length;i++)
+				{
+					option = document.createElement("option");
+					option.text = graphdata.rows[i] + " - " + (parseInt(graphdata.rows[i])+1);
+					option.value = graphdata.rows[i];
+					ddl.add(option);
+				}
+
+				ddl = document.getElementById("ddlStat");
+
+				for (var i=0;i<graphdata.stats.length;i++)
+				{
+					option = document.createElement("option");
+					option.text = graphdata.stats[i];
+					option.value = graphdata.stats[i];
+					ddl.add(option);
+				}
+
+				displayData();
+			}
+
+			function displayData()
+			{
+				var row = document.getElementById("ddlRow").value;
+				var stat = document.getElementById("ddlStat").value;
+
+				var max = getMaxStatistic(row,stat);
+				var fill,p;
+				var percentage,actual;
+
+				for (var i=0;i<graphdata.cols.length;i++)
+				{
+					actual = getStatistic(graphdata.cols[i],row,stat);
+					percentage = 100 - ((actual/max) * 100);
+
+					fill = document.getElementById("fill_" +i);
+					fill.style.marginTop = (percentage/100 * (0.8*500)) + "px";
+
+					p = document.getElementById("p_" +i);
+					p.innerHTML = actual;
+				}
+
+				displayScale(max);
+
+				var average = getAverageStatistic(row,stat);
+				
+				var average_container = document.getElementById("average_container");
+				var average_fill = document.getElementById("average_fill");
+				var average_label = document.getElementById("average_label");
+
+				percentage = 100 - ((average/max) * 100);
+				average_container.style.width =  (graphdata.cols.length * 100) + "px";
+				average_fill.style.marginTop = (percentage/100 * (0.8*500)) + "px";
+				average_label.innerHTML = "Average: " + average;
+			}
+
+			function getAverageStatistic(row,stat)
+			{
+				var average=0;
+				var temp;
+
+				for (var i=0;i<graphdata.cols.length;i++)
+				{
+					temp = graphdata.cols[i].stats.filter(function (x) {return x.year==row;});
+
+					if (temp.length>0)
+					{
+						average = average + temp[0][stat];
+					}
+				}
+
+				if (graphdata.cols.length == 0)
+				{
+					return 0;
+				}
+				else
+				{
+					return (average / (graphdata.cols.length)).toFixed(1);
+				}
+			}
+
+			function getStatistic(data,row,stat)
+			{
+				var temp;
+
+				temp = data.stats.filter(function (x) {return x.year==row;});
+
+				if (temp.length>0)
+				{
+					return temp[0][stat];
+				}
+
+				return 0;
+			}
+			
+			function getMaxStatistic(row,stat)
+			{
+				var max=1;
+				var temp;
+
+				for (var i=0;i<graphdata.cols.length;i++)
+				{
+					temp = graphdata.cols[i].stats.filter(function (x) {return x.year==row;});
+
+					if (temp.length>0)
+					{
+						if (temp[0][stat]>max)
+						{
+							max = temp[0][stat];
+						}	
+					}
+				}
+
+				if (max % 10 == 0)
+				{
+					return max+10;
+				}
+				else
+				{
+					return max - (max % 10) + 10;
+				}
+			}
+
+			function displayScale(maxval)
+			{
+				var scale = document.getElementById("scale_container");
+				scale.innerHTML="";
+
+				var units = maxval/10;
+				var data_unit;
+
+				for (var i=units;i>=1;i--)
+				{
+					data_unit = document.createElement("div");
+					data_unit.className = "scale_unit";
+					data_unit.style.height = (100/units) + "%";
+					data_unit.innerHTML = i * 10;
+
+					scale.appendChild(data_unit);
+				}
+			}
+		</script>
+	</head>
+	
+	<body onload="populate();">
+		<div id="graph_container">
+			<div id="average_container">
+				<div id="average_fill">
+					<p id="average_label"></p>
+				</div>
+			</div>			
+
+			<div id="scale_container">
+
+			</div>
+
+			<div id="col_container">
+
+			</div>
+		</div>
+
+		<select id="ddlRow" onchange="displayData();">
+
+		</select>
+
+		<select id="ddlStat" onchange="displayData();">
+
+		</select>
+	</body>
+</html>
